@@ -2,7 +2,7 @@ NAME
     Complete - Completion modules family
 
 VERSION
-    This document describes version 0.02 of Complete (from Perl distribution
+    This document describes version 0.03 of Complete (from Perl distribution
     Complete), released on 2014-07-02.
 
 DESCRIPTION
@@ -10,17 +10,6 @@ DESCRIPTION
     with completion (including, but not limited to, shell tab completion,
     tab completion feature in other CLI-based application, web autocomplete,
     etc).
-
-    Many of the "Complete::*" modules (like, e.g. Complete::Perl,
-    Complete::Module, Complete::Unix, Complete::Util) contains
-    "complete_*()" functions. These functions are generic, "low-level"
-    completion routines: they accept the word to be completed, zero or more
-    other arguments, and return an arrayref containing possible completion
-    from a specific source. They are not tied to any environment (shell, or
-    web). They can even be used for general purposes outside the context of
-    completion. Examples are: "complete_file()" (complete from list of files
-    in a specific directory), "complete_env()" (complete from list of
-    environment variables), and so on.
 
     "Complete::Bash::*" modules are specific to bash shell. See
     Complete::Bash on how to do bash tab completion with Perl.
@@ -34,6 +23,47 @@ DESCRIPTION
     Compared to other modules, this (family of) module(s) tries to have a
     clear separation between general completion routine and
     shell-/environment specific ones, for more reusability.
+
+  "complete_*()" functions
+    The main functions that do the actual completion are the "complete_*()"
+    functions. These functions are generic completion routines: they accept
+    the word to be completed, zero or more other arguments, and mostly
+    return an arrayref containing possible completion from a specific
+    source. They are not tied to any environment (shell, or web). They can
+    even be used for general purposes outside the context of completion.
+    Examples are "complete_file()" (complete from list of files in a
+    specific directory), "complete_env()" (complete from list of environment
+    variables), and so on. An example:
+
+     use Complete::Util qw(complete_array_elem);
+     my $ary = complete_array_elem(array=>[qw/apple apricot banana/], word=>'ap');
+     # -> ['apple', 'apricot']
+
+    More complex "complete_*()" functions might return a *hashref* instead
+    of arrayref: it contains the completion reply (in the "completion" keys)
+    as well as other metadata like hints so the formatting function can
+    properly display this to shell/etc. Example:
+
+     {completion=>[qw/$HOME $ENV/], type=>'env'}
+
+    Given this data, "Complete::Bash::format_completion()" will produce
+    this:
+
+     $HOME
+     $ENV
+
+    However, given one of these:
+
+     [qw/$HOME $ENV/]
+     {completion=>[qw/$HOME $ENV/], type=>'filename'}
+
+    then "format_completion()" will produce:
+
+     \$HOME
+     \$ENV
+
+    the difference is the escaping backslash for the "$" character. There
+    are other hints available.
 
 DEVELOPER'S NOTES
     Metadata. "complete_*()" currently returns array of string. In some
@@ -54,17 +84,17 @@ DEVELOPER'S NOTES
        {word=>"word2", ...},
        {word=>"word3", ...}, ]
 
-    "Matching method". Currently most "complete_*()" routines match word
-    using simple string prefix matching. fish also supports matching not by
-    prefix only, but using wildcard. For example, if word if "b??t" then
-    "bait" can be suggested as a possible completion. fish also supports
-    fuzzy matching (e.g. "house" can bring up "horse" or "hose"). There is
-    also spelling-/auto-correction feature in some shells. This mode of
-    matching can be added later in the various "complete_*()" routines,
-    turned on via a flag argument. Or there could be helper routines for
-    this. In general this won't pose a problem to the API.
+    Matching method. Currently most "complete_*()" routines match word using
+    simple string prefix matching. fish also supports matching not by prefix
+    only, but using wildcard. For example, if word if "b??t" then "bait" can
+    be suggested as a possible completion. fish also supports fuzzy matching
+    (e.g. "house" can bring up "horse" or "hose"). There is also
+    spelling-/auto-correction feature in some shells. This mode of matching
+    can be added later in the various "complete_*()" routines, turned on via
+    a flag argument. Or there could be helper routines for this. In general
+    this won't pose a problem to the API.
 
-    "Autosuggest". fish supports autosuggestion (autocomplete). When user
+    Autosuggest. fish supports autosuggestion (autocomplete). When user
     types, without she pressing Tab, the shell will suggest completion (not
     only for a single token, but possibly for the entire command). If the
     user wants to accept the suggestion, she can press the Right arrow key.

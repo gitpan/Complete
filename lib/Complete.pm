@@ -3,7 +3,7 @@ package Complete;
 use 5.010001;
 
 our $DATE = '2014-07-02'; # DATE
-our $VERSION = '0.02'; # VERSION
+our $VERSION = '0.03'; # VERSION
 
 1;
 #ABSTRACT: Completion modules family
@@ -20,23 +20,13 @@ Complete - Completion modules family
 
 =head1 VERSION
 
-This document describes version 0.02 of Complete (from Perl distribution Complete), released on 2014-07-02.
+This document describes version 0.03 of Complete (from Perl distribution Complete), released on 2014-07-02.
 
 =head1 DESCRIPTION
 
 The namespace C<Complete::> is used for the family of modules that deal with
 completion (including, but not limited to, shell tab completion, tab completion
 feature in other CLI-based application, web autocomplete, etc).
-
-Many of the C<Complete::*> modules (like, e.g. L<Complete::Perl>,
-L<Complete::Module>, L<Complete::Unix>, L<Complete::Util>) contains
-C<complete_*()> functions. These functions are generic, "low-level" completion
-routines: they accept the word to be completed, zero or more other arguments,
-and return an arrayref containing possible completion from a specific source.
-They are not tied to any environment (shell, or web). They can even be used for
-general purposes outside the context of completion. Examples are:
-C<complete_file()> (complete from list of files in a specific directory),
-C<complete_env()> (complete from list of environment variables), and so on.
 
 C<Complete::Bash::*> modules are specific to bash shell. See L<Complete::Bash>
 on how to do bash tab completion with Perl.
@@ -50,6 +40,46 @@ on how to do fish tab completion with Perl.
 Compared to other modules, this (family of) module(s) tries to have a clear
 separation between general completion routine and shell-/environment specific
 ones, for more reusability.
+
+=head2 C<complete_*()> functions
+
+The main functions that do the actual completion are the C<complete_*()>
+functions. These functions are generic completion routines: they accept the word
+to be completed, zero or more other arguments, and mostly return an arrayref
+containing possible completion from a specific source. They are not tied to any
+environment (shell, or web). They can even be used for general purposes outside
+the context of completion. Examples are C<complete_file()> (complete from list
+of files in a specific directory), C<complete_env()> (complete from list of
+environment variables), and so on. An example:
+
+ use Complete::Util qw(complete_array_elem);
+ my $ary = complete_array_elem(array=>[qw/apple apricot banana/], word=>'ap');
+ # -> ['apple', 'apricot']
+
+More complex C<complete_*()> functions might return a I<hashref> instead of
+arrayref: it contains the completion reply (in the C<completion> keys) as well
+as other metadata like hints so the formatting function can properly display
+this to shell/etc. Example:
+
+ {completion=>[qw/$HOME $ENV/], type=>'env'}
+
+Given this data, C<Complete::Bash::format_completion()> will produce this:
+
+ $HOME
+ $ENV
+
+However, given one of these:
+
+ [qw/$HOME $ENV/]
+ {completion=>[qw/$HOME $ENV/], type=>'filename'}
+
+then C<format_completion()> will produce:
+
+ \$HOME
+ \$ENV
+
+the difference is the escaping backslash for the C<$> character. There are other
+hints available.
 
 =head1 DEVELOPER'S NOTES
 
@@ -70,7 +100,7 @@ versus:
    {word=>"word2", ...},
    {word=>"word3", ...}, ]
 
-C<Matching method>. Currently most C<complete_*()> routines match word using
+B<Matching method>. Currently most C<complete_*()> routines match word using
 simple string prefix matching. fish also supports matching not by prefix only,
 but using wildcard. For example, if word if C<b??t> then C<bait> can be
 suggested as a possible completion. fish also supports fuzzy matching (e.g.
@@ -80,7 +110,7 @@ added later in the various C<complete_*()> routines, turned on via a flag
 argument. Or there could be helper routines for this. In general this won't pose
 a problem to the API.
 
-C<Autosuggest>. fish supports autosuggestion (autocomplete). When user types,
+B<Autosuggest>. fish supports autosuggestion (autocomplete). When user types,
 without she pressing Tab, the shell will suggest completion (not only for a
 single token, but possibly for the entire command). If the user wants to accept
 the suggestion, she can press the Right arrow key. This can be supported later
