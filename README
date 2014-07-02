@@ -1,0 +1,68 @@
+NAME
+    Complete - Completion modules family
+
+VERSION
+    This document describes version 0.01 of Complete (from Perl distribution
+    Complete), released on 2014-07-02.
+
+DESCRIPTION
+    The namespace "Complete::" is used for the family of modules that deal
+    with completion (including, but not limited to, shell tab completion,
+    tab completion feature in other CLI-based application, web autocomplete,
+    etc).
+
+    Many of the "Complete::*" modules (like, e.g. Complete::Perl,
+    Complete::Module, Complete::Unix, Complete::Util) contains
+    "complete_*()" functions. These functions are generic, "low-level"
+    completion routines: they accept the word to be completed, zero or more
+    other arguments, and return an arrayref containing possible completion
+    from a specific source. They are not tied to any environment (shell, or
+    web). They can even be used for general purposes outside the context of
+    completion. Examples are: "complete_file()" (complete from list of files
+    in a specific directory), "complete_env()" (complete from list of
+    environment variables), and so on.
+
+    "Complete::Bash::*" modules are specific to bash shell. See
+    Complete::Bash on how to do bash tab completion with Perl.
+
+    "Complete::Zsh::*" modules are specific to zsh shell. See Complete::Zsh
+    on how to do zsh tab completion with Perl.
+
+    "Complete::Fish::*" modules are specific to fish shell. See
+    Complete::Fish on how to do fish tab completion with Perl.
+
+    Compared to other modules, this (family of) module(s) tries to have a
+    clear separation between general completion routine and
+    shell-/environment specific ones, for more reusability.
+
+SEE ALSO
+    Bash::Completion
+
+    Getopt::Complete
+
+    Perinci::Sub::Complete and "Perinci::Sub::Complete::*" modules deal with
+    providing completion capability for functions that have Rinci metadata.
+
+HOMEPAGE
+    Please visit the project's homepage at
+    <https://metacpan.org/release/Complete>.
+
+SOURCE
+    Source repository is at <https://github.com/sharyanto/perl-Complete>.
+
+BUGS
+    Please report any bugs or feature requests on the bugtracker website
+    <https://rt.cpan.org/Public/Dist/Display.html?Name=Complete>
+
+    When submitting a bug or request, please include a test-file or a patch
+    to an existing test-file that illustrates the bug or desired feature.
+
+AUTHOR
+    Steven Haryanto <stevenharyanto@gmail.com>
+
+COPYRIGHT AND LICENSE
+    This software is copyright (c) 2014 by Steven Haryanto.
+
+    This is free software; you can redistribute it and/or modify it under
+    the same terms as the Perl 5 programming language system itself.
+
