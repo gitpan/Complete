@@ -2,7 +2,7 @@ NAME
     Complete - Completion modules family
 
 VERSION
-    This document describes version 0.01 of Complete (from Perl distribution
+    This document describes version 0.02 of Complete (from Perl distribution
     Complete), released on 2014-07-02.
 
 DESCRIPTION
@@ -35,10 +35,44 @@ DESCRIPTION
     clear separation between general completion routine and
     shell-/environment specific ones, for more reusability.
 
-SEE ALSO
-    Bash::Completion
+DEVELOPER'S NOTES
+    Metadata. "complete_*()" currently returns array of string. In some
+    environment like fish shell this does not provide enough metadata. In
+    fish, aside from string, each completion alternative has some extra
+    metadata. For example, when completing filenames, fish might show each
+    possible completion filename with type (file/directory) and file size at
+    the right of each file name. When completing options, it can also
+    display a summary text for each option. So instead of an array of
+    strings, in the future "complete_*()" can also return an array of
+    hashrefs:
 
-    Getopt::Complete
+     ["word1", "word2", "word3"]
+
+    versus:
+
+     [ {word=>"word1", ...},
+       {word=>"word2", ...},
+       {word=>"word3", ...}, ]
+
+    "Matching method". Currently most "complete_*()" routines match word
+    using simple string prefix matching. fish also supports matching not by
+    prefix only, but using wildcard. For example, if word if "b??t" then
+    "bait" can be suggested as a possible completion. fish also supports
+    fuzzy matching (e.g. "house" can bring up "horse" or "hose"). There is
+    also spelling-/auto-correction feature in some shells. This mode of
+    matching can be added later in the various "complete_*()" routines,
+    turned on via a flag argument. Or there could be helper routines for
+    this. In general this won't pose a problem to the API.
+
+    "Autosuggest". fish supports autosuggestion (autocomplete). When user
+    types, without she pressing Tab, the shell will suggest completion (not
+    only for a single token, but possibly for the entire command). If the
+    user wants to accept the suggestion, she can press the Right arrow key.
+    This can be supported later by a function in Complete::Fish e.g.
+    "shell_complete()" which accepts the command line string.
+
+SEE ALSO
+    Bash::Completion, Getopt::Complete, Term::Completion
 
     Perinci::Sub::Complete and "Perinci::Sub::Complete::*" modules deal with
     providing completion capability for functions that have Rinci metadata.
