@@ -2,52 +2,76 @@ NAME
     Complete - Completion modules family
 
 VERSION
-    This document describes version 0.03 of Complete (from Perl distribution
-    Complete), released on 2014-07-02.
+    This document describes version 0.04 of Complete (from Perl distribution
+    Complete), released on 2014-11-27.
 
 DESCRIPTION
     The namespace "Complete::" is used for the family of modules that deal
     with completion (including, but not limited to, shell tab completion,
     tab completion feature in other CLI-based application, web autocomplete,
-    etc).
+    completion in GUI, etc). Compared to other modules, this (family of)
+    module(s) tries to have a clear separation between general completion
+    routine and shell-/environment specific ones, for more reusability.
 
+    This POD page gives an overview of the modules in "Complete::*"
+    namespace.
+
+  Modules
     "Complete::Bash::*" modules are specific to bash shell. See
-    Complete::Bash on how to do bash tab completion with Perl.
+    Complete::Bash on some of the ways to do bash tab completion with Perl.
+    Other shells are also supported. For shell-specific information, please
+    refer to "Complete::Zsh", "Complete::Tcsh", "Complete::Fish".
 
-    "Complete::Zsh::*" modules are specific to zsh shell. See Complete::Zsh
-    on how to do zsh tab completion with Perl.
+    Other modules usually are named after the type of completion answer they
+    provide. For example: Complete::Unix completes username/group name,
+    Complete::Util completes from several generic sources:
+    "complete_array_elem" completes from an array, "complete_env" from a
+    list of environment variables, "complete_file" from files/directories on
+    the filesystem.
 
-    "Complete::Fish::*" modules are specific to fish shell. See
-    Complete::Fish on how to do fish tab completion with Perl.
-
-    Compared to other modules, this (family of) module(s) tries to have a
-    clear separation between general completion routine and
-    shell-/environment specific ones, for more reusability.
+    "Complete::*" modules for non-shell environment (like browser or GUI)
+    have not been developed. Please check again from time to time in the
+    future.
 
   "complete_*()" functions
     The main functions that do the actual completion are the "complete_*()"
     functions. These functions are generic completion routines: they accept
-    the word to be completed, zero or more other arguments, and mostly
-    return an arrayref containing possible completion from a specific
-    source. They are not tied to any environment (shell, or web). They can
-    even be used for general purposes outside the context of completion.
-    Examples are "complete_file()" (complete from list of files in a
-    specific directory), "complete_env()" (complete from list of environment
-    variables), and so on. An example:
+    the word to be completed, zero or more other arguments, and return a
+    completion answer structure (see "Completion answer structure").
 
      use Complete::Util qw(complete_array_elem);
      my $ary = complete_array_elem(array=>[qw/apple apricot banana/], word=>'ap');
      # -> ['apple', 'apricot']
 
-    More complex "complete_*()" functions might return a *hashref* instead
-    of arrayref: it contains the completion reply (in the "completion" keys)
-    as well as other metadata like hints so the formatting function can
-    properly display this to shell/etc. Example:
+  Completion answer structure
+    "complete_*()" functions can return an arrayref or hashref. An example
+    of the arrayref form:
 
-     {completion=>[qw/$HOME $ENV/], type=>'env'}
+     ['apple', 'apricot']
 
-    Given this data, "Complete::Bash::format_completion()" will produce
-    this:
+    That is, the completion answer is simply an array of words. However,
+    each element can also be a hashref to give metadata to each entry, for
+    example:
+
+     [{word=>'apple', summary=>'A delicious fruit with thousands of varieties'},
+      {word=>'apricot', summary=>'Another delicious fruit'},]
+
+    The "summary" can be used, e.g. by the fish shell which displays a
+    description beside each completion. Or by other environments as they see
+    fit. Other metadata can also be added to each entry's hashref.
+
+    The second form of completion answer structure is hashref. It must
+    contain the main key "words" which is the same structure as the arrayref
+    above. Aside from "words", the hashref can contain extra metadata which
+    can give hints to the formatter on how to better format/display the
+    answer: "type", "path_sep", "escmode" etc (see Complete::Bash for
+    example on what hints it understands).
+
+     {words=>[qw/apple apricot/]}
+     {words=>[qw/$HOME $ENV/], type=>'env'}
+
+    In the second example, "Complete::Bash::format_completion()" can be
+    instructed to produce the final result like this:
 
      $HOME
      $ENV
@@ -55,58 +79,16 @@ DESCRIPTION
     However, given one of these:
 
      [qw/$HOME $ENV/]
-     {completion=>[qw/$HOME $ENV/], type=>'filename'}
+     {words=>[qw/$HOME $ENV/], type=>'filename'}
 
     then "format_completion()" will produce:
 
      \$HOME
      \$ENV
 
-    the difference is the escaping backslash for the "$" character. There
-    are other hints available.
-
-DEVELOPER'S NOTES
-    Metadata. "complete_*()" currently returns array of string. In some
-    environment like fish shell this does not provide enough metadata. In
-    fish, aside from string, each completion alternative has some extra
-    metadata. For example, when completing filenames, fish might show each
-    possible completion filename with type (file/directory) and file size at
-    the right of each file name. When completing options, it can also
-    display a summary text for each option. So instead of an array of
-    strings, in the future "complete_*()" can also return an array of
-    hashrefs:
-
-     ["word1", "word2", "word3"]
-
-    versus:
-
-     [ {word=>"word1", ...},
-       {word=>"word2", ...},
-       {word=>"word3", ...}, ]
-
-    Matching method. Currently most "complete_*()" routines match word using
-    simple string prefix matching. fish also supports matching not by prefix
-    only, but using wildcard. For example, if word if "b??t" then "bait" can
-    be suggested as a possible completion. fish also supports fuzzy matching
-    (e.g. "house" can bring up "horse" or "hose"). There is also
-    spelling-/auto-correction feature in some shells. This mode of matching
-    can be added later in the various "complete_*()" routines, turned on via
-    a flag argument. Or there could be helper routines for this. In general
-    this won't pose a problem to the API.
-
-    Autosuggest. fish supports autosuggestion (autocomplete). When user
-    types, without she pressing Tab, the shell will suggest completion (not
-    only for a single token, but possibly for the entire command). If the
-    user wants to accept the suggestion, she can press the Right arrow key.
-    This can be supported later by a function in Complete::Fish e.g.
-    "shell_complete()" which accepts the command line string.
+    the difference is the escaping backslash for the "$" character.
 
 SEE ALSO
-    Bash::Completion, Getopt::Complete, Term::Completion
-
-    Perinci::Sub::Complete and "Perinci::Sub::Complete::*" modules deal with
-    providing completion capability for functions that have Rinci metadata.
-
 HOMEPAGE
     Please visit the project's homepage at
     <https://metacpan.org/release/Complete>.
@@ -122,10 +104,10 @@ BUGS
     to an existing test-file that illustrates the bug or desired feature.
 
 AUTHOR
-    Steven Haryanto <stevenharyanto@gmail.com>
+    perlancar <perlancar@cpan.org>
 
 COPYRIGHT AND LICENSE
-    This software is copyright (c) 2014 by Steven Haryanto.
+    This software is copyright (c) 2014 by perlancar@cpan.org.
 
     This is free software; you can redistribute it and/or modify it under
     the same terms as the Perl 5 programming language system itself.
