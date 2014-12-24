@@ -3,21 +3,23 @@
 use strict;
 use warnings;
 
-
+use 5.010001;
 
 use ExtUtils::MakeMaker;
 
 
 
 my %WriteMakefileArgs = (
-  "ABSTRACT" => "Completion modules family",
+  "ABSTRACT" => "Convention for Complete::* modules family and common settings",
   "AUTHOR" => "perlancar <perlancar\@cpan.org>",
   "CONFIGURE_REQUIRES" => {
-    "ExtUtils::MakeMaker" => 0
+    "ExtUtils::MakeMaker" => 0,
+    "Perl::osnames" => "0.09"
   },
   "DISTNAME" => "Complete",
   "EXE_FILES" => [],
   "LICENSE" => "perl",
+  "MIN_PERL_VERSION" => "5.010001",
   "NAME" => "Complete",
   "PREREQ_PM" => {},
   "TEST_REQUIRES" => {
@@ -26,7 +28,7 @@ my %WriteMakefileArgs = (
     "IPC::Open3" => 0,
     "Test::More" => 0
   },
-  "VERSION" => "0.05",
+  "VERSION" => "0.06",
   "test" => {
     "TESTS" => "t/*.t"
   }
@@ -38,6 +40,7 @@ my %FallbackPrereqs = (
   "File::Spec" => 0,
   "IO::Handle" => 0,
   "IPC::Open3" => 0,
+  "Perl::osnames" => "0.09",
   "Test::More" => 0
 );
 
