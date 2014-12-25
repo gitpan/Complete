@@ -1,23 +1,19 @@
-NAME
-    Complete - Convention for Complete::* modules family and common settings
-
-VERSION
-    This document describes version 0.06 of Complete (from Perl distribution
-    Complete), released on 2014-12-24.
-
 DESCRIPTION
-    The namespace "Complete::" is used for the family of modules that deal
-    with completion (including, but not limited to, shell tab completion,
-    tab completion feature in other CLI-based application, web autocomplete,
-    completion in GUI, etc). This (family of) modules try to have a clear
-    separation between general completion routine and shell-/environment
-    specific ones, for more reusability.
 
-    This POD page gives an overview of the modules in "Complete::*"
+    The namespace Complete:: is used for the family of modules that deal
+    with completion (including, but not limited to, shell tab completion,
+    tab completion feature in other CLI-based application, web
+    autocomplete, completion in GUI, etc). This (family of) modules try to
+    have a clear separation between general completion routine and
+    shell-/environment specific ones, for more reusability.
+
+    This POD page gives an overview of the modules in Complete::*
     namespace, establishes convention, and declares common settings.
 
-  Modules
-   Generic (non-environment-specific) modules
+ Modules
+
+  Generic (non-environment-specific) modules
+
     Modules usually are named after the type of completion answer they
     provide. For example: Complete::Unix completes username/group name,
     Complete::Getopt::Long completes from Getopt::Long specification,
@@ -25,19 +21,21 @@ DESCRIPTION
     exception is Complete::Util which contains several routines to complete
     from common/generic sources (array, hash, file, environment).
 
-   Environment-specific modules
-    "Complete::Bash::*" modules are specific to bash shell. See
+  Environment-specific modules
+
+    Complete::Bash::* modules are specific to bash shell. See
     Complete::Bash on some of the ways to do bash tab completion with Perl.
     Other shells are also supported. For shell-specific information, please
-    refer to Complete::Zsh, Complete::Tcsh, Complete::Fish, as well as their
-    submodules.
+    refer to Complete::Zsh, Complete::Tcsh, Complete::Fish, as well as
+    their submodules.
 
-    "Complete::*" modules for non-shell environment (like browser or GUI)
+    Complete::* modules for non-shell environment (like browser or GUI)
     have not been developed. Please check again from time to time in the
     future.
 
-  "complete_*()" functions
-    The main functions that do the actual completion are the "complete_*()"
+ complete_*() functions
+
+    The main functions that do the actual completion are the complete_*()
     functions. These functions are generic completion routines: they accept
     the word to be completed, zero or more other arguments, and return a
     completion answer structure (see "Completion answer structure").
@@ -46,163 +44,156 @@ DESCRIPTION
      my $ary = complete_array_elem(array=>[qw/apple apricot banana/], word=>'ap');
      # -> ['apple', 'apricot']
 
-    Convention for "complete_*" function:
+    Convention for complete_* function:
 
-    *   Accept a hash argument
+      * Accept a hash argument
 
-        Example:
+      Example:
 
-         complete_array_elem(%args)
+       complete_array_elem(%args)
 
-        Required arguments: "word" (the word to be completed). Sometimes,
-        for lower-level functions, you can accept "words" and "cword"
-        instead of "word", For example, in function
-        "Complete::Getopt::Long::complete_cli_arg".
+      Required arguments: word (the word to be completed). Sometimes, for
+      lower-level functions, you can accept words and cword instead of
+      word, For example, in function
+      Complete::Getopt::Long::complete_cli_arg.
 
-        Optional common arguments: "ci" (bool, whether the matching should
-        be case-insensitive, if unspecified should default to
-        $Complete::OPT_CI).
+      Optional common arguments: ci (bool, whether the matching should be
+      case-insensitive, if unspecified should default to
+      $Complete::OPT_CI).
 
-        Other arguments: you can define more arguments as you fit. Often
-        there is at least one argument to specify or customize the source of
-        completion, for example for the function
-        "Complete::Util::complete_array_elem" there is an "array" argument
-        to specify the source array.
+      Other arguments: you can define more arguments as you fit. Often
+      there is at least one argument to specify or customize the source of
+      completion, for example for the function
+      Complete::Util::complete_array_elem there is an array argument to
+      specify the source array.
 
-    *   Return completion answer structure
+      * Return completion answer structure
 
-        See "Completion answer structure".
+      See "Completion answer structure".
 
-    *   Use defaults from global Complete settings, when applicable
+      * Use defaults from global Complete settings, when applicable
 
-        See "SETTINGS"" in "
+      See "SETTINGS"" in "
 
-  Completion answer structure
-    "complete_*()" functions return completion answer structure. Completion
-    answer contains the completion entries as well as extra metadata to give
-    hints to formatters/tools. It is a hashref which can contain the
+ Completion answer structure
+
+    complete_*() functions return completion answer structure. Completion
+    answer contains the completion entries as well as extra metadata to
+    give hints to formatters/tools. It is a hashref which can contain the
     following keys:
 
-    *   words => array
+      * words => array
 
-        This key is required. Its value is an array of completion entries. A
-        completion entry can be a string or a hashref. Example:
+      This key is required. Its value is an array of completion entries. A
+      completion entry can be a string or a hashref. Example:
 
-         ['apple', 'apricot'] # array of strings
+       ['apple', 'apricot'] # array of strings
+      
+       [{word=>'apple', summary=>'A delicious fruit with thousands of varieties'},
+        {word=>'apricot', summary=>'Another delicious fruit'},] # array of hashes
 
-         [{word=>'apple', summary=>'A delicious fruit with thousands of varieties'},
-          {word=>'apricot', summary=>'Another delicious fruit'},] # array of hashes
+      As you can see from the above, each entry can contain description
+      (can be displayed in shells that support them, like fish and zsh).
 
-        As you can see from the above, each entry can contain description
-        (can be displayed in shells that support them, like fish and zsh).
+      * type => str
 
-    *   type => str
+      See Complete::Bash.
 
-        See Complete::Bash.
+      * path_sep => str
 
-    *   path_sep => str
+      See Complete::Bash.
 
-        See Complete::Bash.
+      * escmode => str
 
-    *   escmode => str
+      See Complete::Bash.
 
-        See Complete::Bash.
+      * static => bool
 
-    *   static => bool
+      Specify that completion is "static", meaning that it does not depend
+      on external state (like filesystem) or a custom code which can return
+      different answer everytime completion is requested.
 
-        Specify that completion is "static", meaning that it does not depend
-        on external state (like filesystem) or a custom code which can
-        return different answer everytime completion is requested.
-
-        This can be useful for code that wants to generate completion code,
-        like bash completion or fish completion. Knowing that completion for
-        an option value is static means that completion for that option can
-        be answered from an array instead of having to call code/program
-        (faster).
+      This can be useful for code that wants to generate completion code,
+      like bash completion or fish completion. Knowing that completion for
+      an option value is static means that completion for that option can
+      be answered from an array instead of having to call code/program
+      (faster).
 
     As a shortcut, completion answer can also be an arrayref (just the
-    "words") without any metadata.
+    words) without any metadata.
 
     Examples:
 
      # hash form
      {words=>[qw/apple apricot/]}
-
+    
      # another hash form. type=env instructs formatter not to escape '$'
      {words=>[qw/$HOME $ENV/], type=>'env'}
-
+    
      # array form
      ['apple', 'apricot']
-
+    
      # another array form, each entry is a hashref to include description
      [{word=>'apple', summary=>'A delicious fruit with thousands of varieties'},
       {word=>'apricot', summary=>'Another delicious fruit'},] # array of hashes
 
 SETTINGS
-    This module also defines some configuration variable. "Complete::*"
+
+    This module also defines some configuration variable. Complete::*
     modules should use the default from these settings, to make it
     convenient for users to change some behavior globally.
 
     The defaults are optimized for convenience and laziness for user typing
     and might change from release to release.
 
-  $Complete::OPT_CI => bool (default: from COMPLETE_OPT_CI or 1)
-    If set to 1, matching is done case-insensitively. This setting should be
-    consulted as the default for all "ci" arguments in the "complete_*"
-    functions. But users can override this setting by providing value to
-    "ci" argument.
+ $Complete::OPT_CI => bool (default: from COMPLETE_OPT_CI or 1)
 
-    In bash/readline, this is akin to setting "completion-ignore-case".
+    If set to 1, matching is done case-insensitively. This setting should
+    be consulted as the default for all ci arguments in the complete_*
+    functions. But users can override this setting by providing value to ci
+    argument.
 
-  $Complete::OPT_MAP_CASE => bool (default: from COMPLETE_OPT_MAP_CASE or 1)
-    This is exactly like "completion-map-case" in readline/bash to treat "_"
-    and "-" as the same when matching.
+    In bash/readline, this is akin to setting completion-ignore-case.
+
+ $Complete::OPT_MAP_CASE => bool (default: from COMPLETE_OPT_MAP_CASE or 1)
+
+    This is exactly like completion-map-case in readline/bash to treat _
+    and - as the same when matching.
 
     All Complete::Path-based modules (like Complete::Util's
-    "complete_file()"), Complete::Module, or Complete::Riap respect this
+    complete_file()), Complete::Module, or Complete::Riap respect this
     setting.
 
-  $Complete::OPT_EXP_IM_PATH => bool (default: from COMPLETE_OPT_EXP_IM_PATH or 1)
+ $Complete::OPT_EXP_IM_PATH => bool (default: from COMPLETE_OPT_EXP_IM_PATH
+ or 0)
+
     Whether to "expand intermediate paths". What is meant by this is
-    something like zsh: when you type something like "cd /h/u/b/myscript" it
-    can be completed to "cd /home/ujang/bin/myscript".
+    something like zsh: when you type something like cd /h/u/b/myscript it
+    can be completed to cd /home/ujang/bin/myscript.
 
     All Complete::Path-based modules (like Complete::Util's
-    "complete_file()"), Complete::Module, or Complete::Riap respect this
+    complete_file()), Complete::Module, or Complete::Riap respect this
     setting.
+
+    Currently defaults to 0 because in the case of /foo/bar and /foo2/baz,
+    when user type "/foo/b" bash will keep the user stuck at "/foo" because
+    it is the shortest common substring. This is annoying.
 
 ENVIRONMENT
-  COMPLETE_OPT_CI => bool
+
+ COMPLETE_OPT_CI => bool
+
     Set default for $Complete::OPT_CI.
 
-  COMPLETE_OPT_MAP_CASE => bool
+ COMPLETE_OPT_MAP_CASE => bool
+
     Set default for $Complete::OPT_MAP_CASE.
 
-  COMPLETE_OPT_EXP_IM_PATH => bool
+ COMPLETE_OPT_EXP_IM_PATH => bool
+
     Set default for $Complete::OPT_EXP_IM_PATH.
 
 TODO
+
 SEE ALSO
-HOMEPAGE
-    Please visit the project's homepage at
-    <https://metacpan.org/release/Complete>.
-
-SOURCE
-    Source repository is at <https://github.com/perlancar/perl-Complete>.
-
-BUGS
-    Please report any bugs or feature requests on the bugtracker website
-    <https://rt.cpan.org/Public/Dist/Display.html?Name=Complete>
-
-    When submitting a bug or request, please include a test-file or a patch
-    to an existing test-file that illustrates the bug or desired feature.
-
-AUTHOR
-    perlancar <perlancar@cpan.org>
-
-COPYRIGHT AND LICENSE
-    This software is copyright (c) 2014 by perlancar@cpan.org.
-
-    This is free software; you can redistribute it and/or modify it under
-    the same terms as the Perl 5 programming language system itself.
 
