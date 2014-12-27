@@ -1,7 +1,7 @@
 package Complete;
 
 our $DATE = '2014-12-27'; # DATE
-our $VERSION = '0.09'; # VERSION
+our $VERSION = '0.10'; # VERSION
 
 use 5.010001;
 use strict;
@@ -9,7 +9,7 @@ use warnings;
 
 our $OPT_CI          = ($ENV{COMPLETE_OPT_CI}          // 1) ? 1:0;
 our $OPT_MAP_CASE    = ($ENV{COMPLETE_OPT_MAP_CASE}    // 1) ? 1:0;
-our $OPT_EXP_IM_PATH = ($ENV{COMPLETE_OPT_EXP_IM_PATH} // 0) ? 1:0;
+our $OPT_EXP_IM_PATH = ($ENV{COMPLETE_OPT_EXP_IM_PATH} // 1) ? 1:0;
 our $OPT_EXP_IM_PATH_MAX_LEN = ($ENV{COMPLETE_OPT_EXP_IM_PATH_MAX_LEN} // 2)+0;
 
 1;
@@ -27,7 +27,7 @@ Complete - Convention for Complete::* modules family and common settings
 
 =head1 VERSION
 
-This document describes version 0.09 of Complete (from Perl distribution Complete), released on 2014-12-27.
+This document describes version 0.10 of Complete (from Perl distribution Complete), released on 2014-12-27.
 
 =head1 DESCRIPTION
 
